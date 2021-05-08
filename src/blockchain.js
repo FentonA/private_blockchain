@@ -68,14 +68,20 @@ class Blockchain {
             block.time = new Date().getTime().toString().slice(0, -3);
            if(self.chain.length > 0){
                block.previousBlockHash = self.chain[self.chain.length-1].hash;
-               block.hash = SHA256(JSON.stringify(block)).toString();
-               self.height += 1;
-               resolve(block)
            }
+            block.hash = SHA256(JSON.stringify(block)).toString();
+            let errors = await self.validateChain();
+            console.log(errors)
+            //console.debug('Validate here')
+            if (errors.length === 0){
+                self.chain.push(block);
+                self.height++;
+                resolve(block)
+            }
+           
            else{
                resolve(Error("Block was not added"))
            }
-           self.chain.push(block);
         });
     }
 
