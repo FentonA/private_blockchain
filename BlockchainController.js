@@ -21,7 +21,7 @@ class BlockchainController {
 
     // Enpoint to Get a Block by Height (GET Endpoint)
     getBlockByHeight() {
-        this.app.get("/block/height/:height", async (req, res) => {
+        this.app.get("/block/:height", async (req, res) => {
             if(req.params.height) {
                 const height = parseInt(req.params.height);
                 let block = await this.blockchain.getBlockByHeight(height);
@@ -93,6 +93,19 @@ class BlockchainController {
                 return res.status(404).send("Block Not Found! Review the Parameters!");
             }
             
+        });
+    }
+
+    //This endpoint lets the user check if the block is invalid or not'
+    validateBlock(){
+        this.app.get("/validateBlock", async (req, res) => {
+            try{
+                let errorList = await this.blockchain.validateChain();
+                console.log('The following is the errors list' + errorList)
+                return res.status(200).json(errorList);
+            } catch (error){
+                return res.status(404).send('Validation has not been performed')
+            }
         });
     }
 

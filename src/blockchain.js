@@ -64,12 +64,14 @@ class Blockchain {
     _addBlock(block) {
         let self = this;
         return new Promise(async (resolve, reject) => {
-            block.height = self.chain.length;
-            block.time = new Date().getTime().toString().slice(0, -3);
            if(self.chain.length > 0){
+               
                block.previousBlockHash = self.chain[self.chain.length-1].hash;
            }
+           block.height = self.chain.length;
+           block.time = new Date().getTime().toString().slice(0, -3);
             block.hash = SHA256(JSON.stringify(block)).toString();
+
             let errors = await self.validateChain();
             console.log(errors)
             //console.debug('Validate here')
@@ -95,7 +97,7 @@ class Blockchain {
      */
     requestMessageOwnershipVerification(address) {
         return new Promise((resolve) => {
-           resolve(`${address}:${new Date().getTime().toString().slice(0, -3)}:starRegistery`) 
+           resolve(`${address}:${new Date().getTime().toString().slice(0, -3)}:starRegistery`);
         });
     }
 
@@ -122,8 +124,11 @@ class Blockchain {
             let messageTime = parseInt(message.split(':')[1])
             let currentTime = parseInt(new Date().getTime().toString().slice(0, -3));
             if((messageTime - currentTime) < 3000 ){
+                let newBlock = new BlockClass.Block({owner:address ,data: star});
                 bitcoinMessage.verify(message, address, signature)
-                resolve(_addBlock(block))
+                resolve(self._addBlock(newBlock))
+            } else{
+                reject("Something went wrong");
             }
         });
     }
@@ -137,7 +142,12 @@ class Blockchain {
     getBlockByHash(hash) {
         let self = this;
         return new Promise((resolve, reject) => {
-           resolve(this.chain.filter(hash))
+        let block = self.chain.filter(p => p.hash === hash)[0];
+            if(block){
+                resolve(block);
+            } else{
+                reject("Something went wrong");
+            }
         });
     }
 
@@ -168,7 +178,10 @@ class Blockchain {
         let self = this;
         let stars = [];
         return new Promise((resolve, reject) => {
-            resolve(self.chain.push(stars[address]))
+            for (let block of self.chain){
+                if (block.getBData().owner === address){
+                    resolve( stars.push(block.getBData().star));
+            }
         });
     }
 
@@ -182,7 +195,7 @@ class Blockchain {
         let self = this;
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
-            for (var i = 0; i< this.chain.length; i++){
+            for (var i = 0; i< self.chain.length; i++){
                 for( var j = 0; j < this.chain.length[i]; j++){
                     if(this.chain[i].hash != this.chain[j].previousBlockHash){
                         resolve("No errors detetected")
