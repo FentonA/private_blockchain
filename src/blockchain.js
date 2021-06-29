@@ -77,7 +77,7 @@ class Blockchain {
             self.chain.push(block);
             const erorrlog = await self.validateChain();
             if(erorrlog.length !== 0){
-                resolve({message: "Blockchain is not valid", error: errorLog, status:false});
+                resolve({message: "Blockchain is not valid", error: erorrlog, status:false});
             }
             resolve(block);
         });
@@ -140,16 +140,23 @@ class Blockchain {
      * @param {*} hash 
      */
     getBlockByHash(hash) {
+
         let self = this;
         return new Promise((resolve, reject) => {
-        let block = self.chain.filter(p => p.hash === hash)[0];
-            if(block){
-                resolve(block);
-            } else{
-                reject("Something went wrong");
-            }
+            let block_found = self.chain.filter(function(block) {
+            return block.hash === hash;
         });
-    }
+            if(block_found !== null){
+                resolve(block_found);
+            }
+            if(block_found == null){
+                reject ('Block By hash not Found');
+            }
+        
+             });
+        
+        }
+    
 
     /**
      * This method will return a Promise that will resolve with the Block object 
@@ -197,7 +204,7 @@ class Blockchain {
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
             for (var i = 0; i< self.chain.length; i++){
-                    if(await self.chain[i].validate() != self.chain[i-1].hash){
+                    if(await self.chain[i].validate() !== self.chain[i].hash){
                         errorLog.push(i)
                         resolve(errorLog)
                      } else (reject("Something went wrong here"))
