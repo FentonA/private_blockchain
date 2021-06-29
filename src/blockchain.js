@@ -182,6 +182,7 @@ class Blockchain {
                 if (block.getBData().owner === address){
                     resolve( stars.push(block.getBData().star));
             }
+        }
         });
     }
 
