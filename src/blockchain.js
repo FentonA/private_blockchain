@@ -75,7 +75,11 @@ class Blockchain {
             block.height = ChainHeight + 1;
             block.time = new Date().getTime().toString().slice(0, -3);
             self.chain.push(block);
-            resolve(block)
+            const erorrlog = await self.validateChain();
+            if(erorrlog.length !== 0){
+                resolve({message: "Blockchain is not valid", error: errorLog, status:false});
+            }
+            resolve(block);
         });
     }
 
@@ -115,10 +119,14 @@ class Blockchain {
         return new Promise(async (resolve, reject) => {
             let messageTime = parseInt(message.split(':')[1])
             let currentTime = parseInt(new Date().getTime().toString().slice(0, -3));
-            if((messageTime - currentTime) < 3000 ){
+            if((messageTime - currentTime) < 300 ){
                 let newBlock = new BlockClass.Block({owner:address ,data: star});
+                let isValid = await self.validateChain()
                 bitcoinMessage.verify(message, address, signature)
-                resolve(self._addBlock(newBlock))
+                if(isValid){
+                   resolve(self._addBlock(newBlock)) 
+                }
+                
             } else{
                 reject("Something went wrong");
             }
@@ -189,13 +197,12 @@ class Blockchain {
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
             for (var i = 0; i< self.chain.length; i++){
-                for( var j = 0; j < this.chain.length[i]; j++){
-                    if(this.chain[i].hash != this.chain[j].previousBlockHash){
-                        resolve("No errors detetected")
-                    }
-                    else (reject(errorLog(Error("Something went wrong here"))))
+                    if(await self.chain[i].validate() != self.chain[i-1].hash){
+                        errorLog.push(i)
+                        resolve(errorLog)
+                     } else (reject("Something went wrong here"))
                 }
-            }
+            
         });
     }
 
