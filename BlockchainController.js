@@ -17,6 +17,7 @@ class BlockchainController {
         this.submitStar();
         this.getBlockByHash();
         this.getStarsByOwner();
+        this.validateChain();
     }
 
     // Enpoint to Get a Block by Height (GET Endpoint)
@@ -97,7 +98,7 @@ class BlockchainController {
     }
 
     //This endpoint lets the user check if the block is invalid or not'
-    validateBlock(){
+    validateChain(){
         this.app.get("/validateBlock", async (req, res) => {
             try{
                 let errorList = await this.blockchain.validateChain();

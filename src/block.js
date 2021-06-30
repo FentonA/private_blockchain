@@ -38,18 +38,21 @@ class Block {
     validate() {
         let self = this;
         return new Promise((resolve, reject) => {
-            // Save in auxiliary variable the current block hash
-        try{                                
-            // Recalculate the hash of the Block
-            let current = self.hash;
-            self.hash = null;
-            let blockHash = SHA256(JSON.stringify(self)).toString();
-            self.hash = current;
-            // Comparing if the hashes changed
-            resolve(current == blockHash)
-        }catch(error){
-            reject(new Error(error))
-        }
+            try {
+                // Save in auxiliary variable the current block hash
+                let currentHash = self.hash;   
+                    self.hash = null;                      
+                // Recalculate the hash of the Block
+                    const newHash = SHA256(JSON.stringify(self)).toString();
+                // Comparing if the hashes changed
+                    self.hash = currentHash
+                // Returning the Block is not valid
+                resolve(currentHash === newHash)
+                // Returning the Block is valid
+            } catch (error) {
+                reject(new Error(error))
+            }
+
         });
     }
 
@@ -65,20 +68,20 @@ class Block {
     getBData() {
         let self = this;
         // Getting the encoded data saved in the Block
+        let encodedData = self.body;
         // Decoding the data to retrieve the JSON representation of the object
+        let decodedData = hex2ascii(encodedData);
         // Parse the data to an object to be retrieve.
-        return new Promise((resolve, reject) =>{
-            let decodedData = JSON.parse(hex2ascii(self.body));
-            
-            if(self.previousBlockHash != null){
-                resolve(decodedData);
-            }else{
-                reject("Error");
-            }
-        })
+            let myData = JSON.parse(decodedData)
         // Resolve with the data if the object isn't the Genesis block
-
+            if( myData && self.height > 0){
+                return myData
+            }else {
+                console.log('error')
+            }
     }
+
+
 
 }
 
