@@ -67,7 +67,7 @@ class Blockchain {
             let chainHeight = await self.getChainHeight();
            try {
 
-            if(chainHeight > 0 ){
+            if(chainHeight >= 0 ){
                 block.previousBlockHash = self.chain[self.chain.length-1].hash;
             }
 
@@ -121,7 +121,7 @@ class Blockchain {
         return new Promise(async (resolve, reject) => {
             let messageTime = parseInt(message.split(':')[1])
             let currentTime = parseInt(new Date().getTime().toString().slice(0, -3));
-            if (currentTime - messageTime <= 300000) {
+            if (currentTime - messageTime <= 300) {
                 const isValid = bitcoinMessage.verify(message, address, signature);
                 if (isValid) {
                     let newBlock = new BlockClass.Block({star:star, owner:address});
@@ -187,11 +187,16 @@ class Blockchain {
         let self = this;
         let stars = [];
         return new Promise((resolve, reject) => {
-            for (let block of self.chain){
-                if (block.getBData().owner === address){
-                    resolve( stars.push(block.getBData().star));
-            }
-        }
+            self.chain.forEach((b) =>{
+                let data =b.getData();
+                if(data){
+                    if(data.owner == address)
+                    {
+                        stars.push(data);
+                    }
+                }
+            });
+                resolve(stars);
         });
     }
 
