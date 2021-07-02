@@ -68,7 +68,7 @@ class Blockchain {
            try {
 
             if(self.height > 0 ){
-                block.previousBlockHash = self.chain[self.chain.length - 1].hash;
+                block.previousBlockHash = self.chain[self.chain.length-1].hash;
             }
 
              block.time = new Date().getTime().toString().slice(0, -3);
